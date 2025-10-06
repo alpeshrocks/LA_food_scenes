@@ -1,0 +1,9 @@
+version: 2
+seeds:
+  - name: seed_mentions
+    description: "Cleaned mentions from pipeline"
+    columns:
+      - name: name
+        tests: [not_null]
+      - name: score_buzz
+        tests: [not_null]

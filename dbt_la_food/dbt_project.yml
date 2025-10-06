@@ -1,0 +1,11 @@
+name: 'dbt_la_food'
+version: '1.0.0'
+config-version: 2
+profile: 'dbt_la_food'
+models:
+  dbt_la_food:
+    +materialized: view
+    staging:
+      +schema: staging
+    marts:
+      +schema: marts

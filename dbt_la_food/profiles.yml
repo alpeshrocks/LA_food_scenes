@@ -1,0 +1,11 @@
+dbt_la_food:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: postgres
+      password: postgres
+      port: 5432
+      dbname: la_food
+      schema: public
