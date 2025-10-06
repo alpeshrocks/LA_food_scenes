@@ -32,7 +32,6 @@ def main():
     if args.provider == "nominatim":
         df = geocode_free(df)
     else:
-        # Placeholder for Google Maps Geocoding (requires API key)
         import requests
         key = GOOGLE_MAPS_API_KEY
         if not key:
@@ -49,7 +48,6 @@ def main():
                 lats.append(None); lngs.append(None)
         df["lat"] = lats; df["lng"] = lngs
 
-    # Make a Folium map
     import folium
     m = folium.Map(location=[34.0522, -118.2437], zoom_start=10)
     for _, r in df.iterrows():

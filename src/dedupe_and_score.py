@@ -1,7 +1,7 @@
 import argparse, json, os, math, statistics, datetime as dt
 from typing import List, Dict, Any
 import pandas as pd
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz
 from .config import DATA_DIR
 
 def time_decay_weight(ts: pd.Series, half_life_days: int = 30) -> pd.Series:
@@ -11,7 +11,6 @@ def time_decay_weight(ts: pd.Series, half_life_days: int = 30) -> pd.Series:
     return (2 ** (-ages * lam))
 
 def cluster_names(names: List[str], threshold: int = 88) -> Dict[int, List[int]]:
-    """Simple agglomerative-like clustering using pairwise similarity; good enough for resume project."""
     clusters = {}
     used = set()
     idx = list(range(len(names)))
@@ -50,18 +49,15 @@ def main():
         if col not in df.columns:
             df[col] = None
 
-    # Normalize fields
     df["name_norm"] = df["name"].fillna("").str.strip()
     df = df[df["name_norm"]!=""].copy()
 
-    # Cluster by name similarity
     names = df["name_norm"].tolist()
     clusters = cluster_names(names, threshold=args.min_similarity)
     df["cluster_id"] = -1
     for cid, idxs in clusters.items():
         df.loc[df.index[idxs], "cluster_id"] = cid
 
-    # Aggregate per cluster
     agg = df.groupby("cluster_id").agg({
         "name_norm": lambda s: s.value_counts().idxmax(),
         "neighborhood": lambda s: s.dropna().value_counts().index[0] if s.dropna().size else None,
@@ -74,10 +70,7 @@ def main():
     agg.columns = ["name","neighborhood","cuisine","why","source_url","sentiment","first_seen","last_seen","mentions"]
     agg = agg.reset_index(drop=True)
 
-    # Buzz score: mentions * avg upvotes proxy (not available per-comment -> use mentions)
-    # Trend score: time decay by last_seen
     agg["score_buzz"] = agg["mentions"]
-    # Build a synthetic timestamp using last_seen
     agg["score_trend"] = time_decay_weight(agg["last_seen"], half_life_days=args.decay_half_life_days)
     agg["score_total"] = agg["score_buzz"] * (1 + agg["score_trend"])
 

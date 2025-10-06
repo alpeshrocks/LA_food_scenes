@@ -4,7 +4,9 @@ from openai import OpenAI
 from .config import DATA_DIR, OPENAI_API_KEY
 
 def main(k=6):
-    df = pd.read_csv(os.path.join(DATA_DIR,"mentions_enhanced.csv")) if os.path.exists(os.path.join(DATA_DIR,"mentions_enhanced.csv")) else pd.read_csv(os.path.join(DATA_DIR,"mentions_clean.csv"))
+    path = os.path.join(DATA_DIR,"mentions_enhanced.csv")
+    if not os.path.exists(path): path = os.path.join(DATA_DIR,"mentions_clean.csv")
+    df = pd.read_csv(path)
     texts = (df["name"].fillna("") + " | " + df["why"].fillna("") + " | " + df.get("signature_dishes","").fillna("")).tolist()
     client = OpenAI(api_key=OPENAI_API_KEY)
     embs = []
