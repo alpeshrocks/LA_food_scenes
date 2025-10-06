@@ -19,7 +19,6 @@ def scrape(subreddits: List[str], days_back: int, max_posts: int, query: str) ->
 
     for sub in subreddits:
         sr = reddit.subreddit(sub.strip("r/"))
-        # Use Reddit search for recency + keyword filtering
         for post in tqdm(sr.search(query=query, sort="new", time_filter="month"), desc=f"Searching {sub}"):
             if len(results) >= max_posts:
                 break

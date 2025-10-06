@@ -1,4 +1,4 @@
-import argparse, json, os, math
+import argparse, json, os
 from typing import Dict, Any, List
 from tqdm import tqdm
 import pandas as pd
@@ -51,20 +51,19 @@ def run_llm(model_name: str, batch_size: int):
         for line in tqdm(f_in, desc="LLM extracting"):
             post = json.loads(line)
             comments = post.get("comments", [])
-            # Process in chunks to respect token limits
             for chunk in chunk_comments(comments, max_items=batch_size*4):
                 user = USER_TMPL.format(
                     title=post.get("title",""),
                     selftext=post.get("selftext",""),
                     permalink=post.get("permalink",""),
-                    comments_json=json.dumps(chunk)[:12000]  # safety clamp
+                    comments_json=json.dumps(chunk)[:12000]
                 )
                 try:
                     msg = prompt.format_messages()
                     msg[1].content = user
                     res = llm.invoke(msg)
                     data = parser.parse(res.content)
-                except Exception as e:
+                except Exception:
                     data = {"mentions": []}
 
                 for m in data.get("mentions", []):
@@ -81,7 +80,7 @@ def main():
     args = ap.parse_args()
 
     if not OPENAI_API_KEY:
-        raise RuntimeError("OPENAI_API_KEY missing in environment. Set it or adjust the LLM provider.")
+        raise RuntimeError("OPENAI_API_KEY missing in environment.")
 
     run_llm(args.model, args.batch_size)
 
