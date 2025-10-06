@@ -2,14 +2,14 @@
 
 Analyze community-driven restaurant recommendations in Los Angeles by scraping subreddit threads, extracting structured insights with an LLM, deduplicating/ ranking, and visualizing on an interactive map + Streamlit dashboard.
 
-## ✨ What you get
+## What you get
 - **Scraper**: Pulls posts + full comment trees from target subreddits.
 - **LLM extractor**: Uses an LLM (via LangChain) to convert messy threads into structured restaurant mentions.
 - **Cleaner + Scorer**: Deduplicates names (fuzzy match), computes Buzz/Trend scores.
 - **Map & App**: Geocodes and renders a Folium map; Streamlit app for filters and exploration.
 - **Reproducible**: All steps save intermediate artifacts in `/data` and `/outputs`.
 
-## 🧱 Project Structure
+## Project Structure
 ```
 la_food_scenes_project/
 ├─ src/
@@ -80,7 +80,7 @@ python -m src.geocode_and_map --provider nominatim
 streamlit run src/streamlit_app.py
 ```
 
-## 🧪 Data schema
+## Data schema
 **mentions_clean.csv** (final):
 - `name` — restaurant name
 - `neighborhood` — inferred or extracted
@@ -101,7 +101,7 @@ streamlit run src/streamlit_app.py
 
 ---
 
-## 🧩 New Features
+## New Features
 
 ### Multi-Source Integration
 ```bash
