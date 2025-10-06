@@ -9,7 +9,6 @@ from .embeddings_and_qna import search as qna_search
 st.set_page_config(page_title="LA Food Scenes", layout="wide")
 st.title("🍴 LA Food Scenes — Reddit + Multi-source")
 
-# Load data
 def load_df():
     if os.path.exists(os.path.join(DATA_DIR,"mentions_clustered.csv")):
         return pd.read_csv(os.path.join(DATA_DIR,"mentions_clustered.csv"))
@@ -20,10 +19,8 @@ def load_df():
     st.stop()
 
 df = load_df()
-
 tabs = st.tabs(["Explore Map","Trends","Heatmap","Q&A Search","Digest"])
 
-# --- Explore Map
 with tabs[0]:
     with st.sidebar:
         st.header("Filters")
@@ -41,9 +38,8 @@ with tabs[0]:
     if must_try_only and "sentiment_label" in q.columns: q = q[q["sentiment_label"]=="must-try"]
 
     st.subheader(f"Results ({len(q)})")
-    st.dataframe(q[["name","neighborhood","cuisine","signature_dishes","why","score_buzz","score_trend","score_total","source_url"]].fillna(""))
+    st.dataframe(q[["name","neighborhood","cuisine","why","score_buzz","score_trend","score_total","source_url"]].fillna(""))
 
-    # Map
     map_path = os.path.join(OUT_DIR, "la_food_map.html")
     if os.path.exists(map_path):
         with open(map_path, "r", encoding="utf-8") as f:
@@ -52,13 +48,11 @@ with tabs[0]:
     else:
         st.info("Map not found. Run geocode_and_map.py to generate a Folium map.")
 
-# --- Trends
 with tabs[1]:
     st.subheader("Buzz timeline (weekly)")
-    # Build a weekly time series from mentions if available
-    if os.path.exists(os.path.join(DATA_DIR,"mentions_raw.jsonl")):
-        rows = [json.loads(l) for l in open(os.path.join(DATA_DIR,"mentions_raw.jsonl"),"r",encoding="utf-8")]
-        raw = pd.DataFrame(rows)
+    raw_path = os.path.join(DATA_DIR,"mentions_raw.jsonl")
+    if os.path.exists(raw_path):
+        raw = pd.read_json(raw_path, lines=True)
         raw["week"] = pd.to_datetime(raw["created_iso"], errors="coerce").dt.to_period("W").astype(str)
         ts = raw.groupby("week").size().reset_index(name="mentions")
         chart = alt.Chart(ts).mark_line().encode(x="week:T", y="mentions:Q", tooltip=["week","mentions"]).properties(height=300)
@@ -66,13 +60,13 @@ with tabs[1]:
     else:
         st.info("No raw mention timestamps found. Create mentions_raw.jsonl via LLM pipeline.")
 
-    if os.path.exists(os.path.join(DATA_DIR,"movers.csv")):
+    movers_path = os.path.join(DATA_DIR,"movers.csv")
+    if os.path.exists(movers_path):
         st.subheader("Top Movers (WoW)")
-        st.dataframe(pd.read_csv(os.path.join(DATA_DIR,"movers.csv")))
+        st.dataframe(pd.read_csv(movers_path))
     else:
         st.caption("Run trends.py to generate movers.")
 
-# --- Heatmap
 with tabs[2]:
     st.subheader("Neighborhood density heatmap")
     if all(c in df.columns for c in ["lat","lng"]):
@@ -84,7 +78,6 @@ with tabs[2]:
     else:
         st.info("No coordinates found. Run geocode_and_map.py first.")
 
-# --- Q&A
 with tabs[3]:
     st.subheader("Ask a question")
     prompt = st.text_input("E.g., Where should I go for Thai in Hollywood under $30?")
@@ -92,20 +85,19 @@ with tabs[3]:
     if st.button("Search") and prompt:
         try:
             res = qna_search(prompt, top_k=top_k)
-            st.dataframe(res[["name","neighborhood","cuisine","signature_dishes","why","similarity","source_url"]])
+            st.dataframe(res[["name","neighborhood","cuisine","why","similarity","source_url"]])
         except Exception as e:
             st.error(str(e))
-            st.caption("Make sure you've built the Q&A index via: python -m src.embeddings_and_qna --build")
+            st.caption("Build Q&A index via: python -m src.embeddings_and_qna --build")
 
-# --- Digest
 with tabs[4]:
     st.subheader("Weekly Buzz Digest")
     dig_dir = os.path.join(OUT_DIR,"digests")
     if os.path.exists(dig_dir):
-        files = sorted([f for f in os.listdir(dig_dir) if f.endswith(".md")], reverse=True)
+        files = sorted([f for f in os.listdir(dig_dir) if f.endswith('.md')], reverse=True)
         if files:
             last = files[0]
-            st.markdown(open(os.path.join(dig_dir,last),"r",encoding="utf-8").read())
+            st.markdown(open(os.path.join(dig_dir,last),'r',encoding='utf-8').read())
         else:
             st.info("No digests yet. Run weekly_digest.py.")
     else:
