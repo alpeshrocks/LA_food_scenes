@@ -152,7 +152,7 @@ It’s a **portfolio-ready project** that demonstrates:
 🎓 MS CS @ USC | Data Engineering • Data Science • AI/ML • SWE  
 🌍 Passion for food, travel, and building impactful tech.  
 
-[LinkedIn](https://linkedin.com/in/your-link) • [GitHub](https://github.com/your-handle)
+[LinkedIn](https://www.linkedin.com/in/alpeshshinde/) • [GitHub](https://github.com/alpeshrocks) • [Portfolio](https://alpeshrocks.github.io/alpesh-portfolio/)
 
 ---
 
